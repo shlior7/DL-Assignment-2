@@ -13,6 +13,7 @@ class ConvClassifier(nn.Module):
     The architecture is:
     [(Conv -> ReLU)*P -> MaxPool]*(N/P) -> (Linear -> ReLU)*M -> Linear
     """
+
     def __init__(self, in_size, out_classes, filters, pool_every, hidden_dims):
         """
         :param in_size: Size of input images, e.g. (C,H,W).
@@ -29,10 +30,11 @@ class ConvClassifier(nn.Module):
         self.filters = filters
         self.pool_every = pool_every
         self.hidden_dims = hidden_dims
-
+        self.max_pool_count = 0
         self.feature_extractor = self._make_feature_extractor()
         self.classifier = self._make_classifier()
         print(self)
+
     def _make_feature_extractor(self):
         in_channels, in_h, in_w, = tuple(self.in_size)
 
@@ -49,16 +51,14 @@ class ConvClassifier(nn.Module):
         #     ...
         # in order to append maxpooling layer in the right places.
         # ====== YOUR CODE: ======
-
-
-        # in_channel = in_channels[0]
-        
         for i in range(len(self.filters)):
-            if i%self.pool_every==0:
-                layers.append(nn.MaxPool2d(kernel_size=2))
-            layers.append(nn.Conv2d(in_channels, self.filters[i], kernel_size=3, padding=1))
+            layers.append(nn.Conv2d(in_channels=in_channels,
+                          out_channels=self.filters[i], kernel_size=3, padding=(1, 1)))
             layers.append(nn.ReLU())
             in_channels = self.filters[i]
+            if (i+1)% self.pool_every == 0:
+                layers.append(nn.MaxPool2d(kernel_size=2))
+                self.max_pool_count = self.max_pool_count + 1
 
         # ========================
         seq = nn.Sequential(*layers)
@@ -75,7 +75,9 @@ class ConvClassifier(nn.Module):
         # Hint: use loop for len(self.hidden_dims) and append the layers you need to list named layers.
         # ====== YOUR CODE: ======
 
-        features = in_channels*in_h*in_w
+        features = self.filters[-1] * int(in_h/2**self.max_pool_count) * \
+            int(in_w/(2**self.max_pool_count))
+
         for i in range(len(self.hidden_dims)):
             layers.append(nn.Linear(features, self.hidden_dims[i]))
             layers.append(nn.ReLU())
@@ -92,7 +94,7 @@ class ConvClassifier(nn.Module):
         # run the classifier on them (using self.classifier) and return class scores.
         # ====== YOUR CODE: ======
         x = self.feature_extractor(x)
-        x = torch.flatten(x, 1)
+        x = torch.flatten(x, start_dim=1)
         out = self.classifier(x)
         # ========================
         return out
@@ -107,8 +109,7 @@ class YourCodeNet(ConvClassifier):
     # For example, add batchnorm, dropout, skip connections, change conv
     # filter sizes etc.
     # ====== YOUR CODE: ======
-    
-    
+
     def _make_feature_extractor(self):
         in_channels, in_h, in_w, = tuple(self.in_size)
 
@@ -120,4 +121,3 @@ class YourCodeNet(ConvClassifier):
         seq = nn.Sequential(*layers)
         return seq
     # ========================
-
