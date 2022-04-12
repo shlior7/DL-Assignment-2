@@ -54,7 +54,7 @@ def run_experiment(run_name, out_dir='./results', seed=None,
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Select model class (experiment 1 or 2)
-    model_cls = models.ConvClassifier if not ycn else models.YourCodeNet
+    model_cls = models.ConvClassifier #if not ycn else models.YourCodeNet
 
     # TODO: Train
     # - Create model using model_cls(...).
@@ -67,7 +67,16 @@ def run_experiment(run_name, out_dir='./results', seed=None,
     fit_res = None
     test_epoch_result = None
     # ====== YOUR CODE: ======
-    raise NotImplementedError()
+    # in_size, out_classes, filters, pool_every, hidden_dims
+    in_size = 32 # not really
+    out_classes = 10 # not really
+    filters = filters_per_layer # not really
+    model = model_cls(in_size=in_size, out_classes=out_classes, filters=filters, pool_every=pool_every, hidden_dims=hidden_dims)
+    loss_func = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=reg)
+    trainer = training.TorchTrainer(model, loss_func, optimizer, device)
+    fit_res = trainer.fit(dl_train, dl_val, epochs, checkpoints, early_stopping)
+    test_epoch_result = trainer.test_epoch(dl_test)
     # ========================
     print("==================== Test Results ====================")
     print(f"Test Accuracy: {test_epoch_result.accuracy}")

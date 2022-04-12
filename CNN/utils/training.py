@@ -88,7 +88,23 @@ class TorchTrainer():
             # - Implement early stopping. This is a very useful and
             #   simple regularization technique that is highly recommended.
             # ====== YOUR CODE: ======
-            raise NotImplementedError()
+            train_epoch_result = self.train_epoch(dl_train, verbose=verbose)
+            train_loss.append(train_epoch_result.loss)
+            train_acc.append(train_epoch_result.accuracy)
+
+            val_epoch_result = self.test_epoch(dl_val, verbose=verbose)
+            val_loss.append(val_epoch_result.loss)
+            val_acc.append(val_epoch_result.accuracy)
+            
+            if val_epoch_result.accuracy > best_acc:
+                best_acc = val_epoch_result.accuracy
+                save_checkpoint = True
+            else:
+                epochs_without_improvement += 1
+                if early_stopping is not None and epochs_without_improvement >= early_stopping:
+                    print(f'No improvement in {early_stopping} epochs, stopping early.')
+                    break
+
             # ========================
 
             # Save model checkpoint if requested
@@ -141,7 +157,12 @@ class TorchTrainer():
         # - Calculate number of correct predictions
         # - Return loss as a number (not a tensor) - see funciton .item()
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        self.optimizer.zero_grad()
+        y_pred = self.model(X)
+        loss = self.loss_fn(y_pred, y)
+        loss.backward()
+        self.optimizer.step()
+        num_correct = (y_pred.argmax(dim=1) == y).sum().item()
         # ========================
 
         return BatchResult(loss, num_correct)
@@ -159,7 +180,9 @@ class TorchTrainer():
             # - Calculate number of correct predictions
             # - Return loss as a number (not a tensor) - see funciton .item()
             # ====== YOUR CODE: ======
-            raise NotImplementedError()
+            y_pred = self.model(X)
+            loss = self.loss_fn(y_pred, y)
+            num_correct = (y_pred.argmax(dim=1) == y).sum().item()
             # ========================
         return BatchResult(loss, num_correct)
 
