@@ -68,10 +68,13 @@ def run_experiment(run_name, out_dir='./results', seed=None,
     test_epoch_result = None
     # ====== YOUR CODE: ======
     # in_size, out_classes, filters, pool_every, hidden_dims
-    in_size = 32 # not really
-    out_classes = 10 # not really
-    filters = filters_per_layer # not really
-    model = model_cls(in_size=in_size, out_classes=out_classes, filters=filters, pool_every=pool_every, hidden_dims=hidden_dims)
+    in_size = ds_train[0][0].shape
+    filters = []
+    for i in range(len(filters_per_layer)):
+        for j in range(layers_per_block):
+            filters.append(filters_per_layer[i])
+
+    model = model_cls(in_size=in_size, out_classes=10, filters=filters, pool_every=pool_every, hidden_dims=hidden_dims)
     loss_func = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=reg)
     trainer = training.TorchTrainer(model, loss_func, optimizer, device)

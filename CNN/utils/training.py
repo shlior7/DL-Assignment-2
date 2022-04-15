@@ -89,11 +89,11 @@ class TorchTrainer():
             #   simple regularization technique that is highly recommended.
             # ====== YOUR CODE: ======
             train_epoch_result = self.train_epoch(dl_train, verbose=verbose)
-            train_loss.append(train_epoch_result.loss)
+            train_loss.extend(train_epoch_result.losses)
             train_acc.append(train_epoch_result.accuracy)
 
             val_epoch_result = self.test_epoch(dl_val, verbose=verbose)
-            val_loss.append(val_epoch_result.loss)
+            val_loss.extend(val_epoch_result.losses)
             val_acc.append(val_epoch_result.accuracy)
             
             if val_epoch_result.accuracy > best_acc:
@@ -161,10 +161,10 @@ class TorchTrainer():
         y_pred = self.model(X)
         loss = self.loss_fn(y_pred, y)
         loss.backward()
+        loss=loss.item()
         self.optimizer.step()
         num_correct = (y_pred.argmax(dim=1) == y).sum().item()
         # ========================
-
         return BatchResult(loss, num_correct)
 
     def test_batch(self, batch) -> BatchResult:
@@ -181,7 +181,7 @@ class TorchTrainer():
             # - Return loss as a number (not a tensor) - see funciton .item()
             # ====== YOUR CODE: ======
             y_pred = self.model(X)
-            loss = self.loss_fn(y_pred, y)
+            loss = self.loss_fn(y_pred, y).item()
             num_correct = (y_pred.argmax(dim=1) == y).sum().item()
             # ========================
         return BatchResult(loss, num_correct)
