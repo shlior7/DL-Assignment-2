@@ -20,7 +20,7 @@ import numpy as np
 DATA_DIR = os.path.join(os.getenv('HOME'), '.pytorch-datasets')
 
 
-def run_experiment(run_name, out_dir='./results', seed=None,
+def run_experiment(run_name, out_dir='./results', seed=None, 
                    # Training params
                    bs_train=128, bs_test=None, batches=100, epochs=100,
                    early_stopping=3, checkpoints=None, lr=1e-3, reg=1e-3,
