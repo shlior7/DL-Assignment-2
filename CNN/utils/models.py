@@ -116,7 +116,15 @@ class YourCodeNet(ConvClassifier):
         layers = []
         # Implement this function with the fixes you suggested question 1.1. Extra points.
         # ====== YOUR CODE: ======
-        pass
+        self.pool_every = max(self.pool_every, int( len(self.filters)//2 )) 
+
+        for i in range(len(self.filters)):
+            layers.append(nn.Conv2d(in_channels=in_channels,
+                          out_channels=self.filters[i], kernel_size=3, padding=(1, 1)))
+            layers.append(nn.ReLU())
+            in_channels = self.filters[i]
+            if (i+1)% self.pool_every == 0:
+                layers.append(nn.MaxPool2d(kernel_size=2, stride=1))        
         # ========================
         seq = nn.Sequential(*layers)
         return seq
