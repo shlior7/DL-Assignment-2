@@ -54,7 +54,7 @@ def run_experiment(run_name, out_dir='./results', seed=None,
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Select model class (experiment 1 or 2)
-    model_cls = models.ConvClassifier #if not ycn else models.YourCodeNet
+    model_cls = models.ConvClassifier if not ycn else models.YourCodeNet
 
     # TODO: Train
     # - Create model using model_cls(...).
